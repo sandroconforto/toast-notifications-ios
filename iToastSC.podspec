@@ -1,7 +1,7 @@
 
 Pod::Spec.new do |s|
   s.name         = 'iToastSC'  
-  s.version      = "0.0.1"
+  s.version      = "0.0.2"
   s.summary      = 'An Objective-C iOS way to display non intrusive messages to the user like in Android.'
   s.homepage     = 'https://github.com/sandroconforto/toast-notifications-ios'
   s.license      = { :type => 'MIT', :file => 'LICENSE.txt' }
