@@ -32,6 +32,9 @@ THE SOFTWARE.
 
 #define CURRENT_TOAST_TAG 6984678
 
+#define TOAST_IOS8_BOTTOM_PADDING 20
+#define TOAST_IOS8_TOP_PADDING    40
+
 static const CGFloat kComponentPadding = 5;
 
 static iToastSettings *sharedSettings = nil;
@@ -76,6 +79,8 @@ static iToastSettings *sharedSettings = nil;
     CGRect rect = [attributedText boundingRectWithSize:CGSizeMake(280, 60)
                                                options:NSStringDrawingUsesLineFragmentOrigin
                                                context:nil];
+    [attributedText release];
+    
     CGSize textSize = rect.size;
 	
 	UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, textSize.width + kComponentPadding, textSize.height + kComponentPadding)];
@@ -137,8 +142,9 @@ static iToastSettings *sharedSettings = nil;
 	
 	// Set correct orientation/location regarding device orientation
 	UIInterfaceOrientation orientation = (UIInterfaceOrientation)[[UIApplication sharedApplication] statusBarOrientation];
-	double version = [[[UIDevice currentDevice] systemVersion] doubleValue];
 	switch (orientation) {
+            
+            
 		case UIDeviceOrientationPortrait:
 		{
 			if (theSettings.gravity == iToastGravityTop) {
@@ -154,11 +160,11 @@ static iToastSettings *sharedSettings = nil;
 			point = CGPointMake(point.x + theSettings.offsetLeft, point.y + theSettings.offsetTop);
 			break;
 		}
+            
+            
 		case UIDeviceOrientationPortraitUpsideDown:
 		{
-			if (version < 8.0) {
-				v.transform = CGAffineTransformMakeRotation(M_PI);
-			}
+			v.transform = CGAffineTransformMakeRotation(M_PI);
 			
 			float width = window.frame.size.width;
 			float height = window.frame.size.height;
@@ -177,43 +183,77 @@ static iToastSettings *sharedSettings = nil;
 			point = CGPointMake(point.x - theSettings.offsetLeft, point.y - theSettings.offsetTop);
 			break;
 		}
+            
+            
 		case UIDeviceOrientationLandscapeLeft:
 		{
-			if (version < 8.0) {
-				v.transform = CGAffineTransformMakeRotation(M_PI/2); //rotation in radians
-			}
-			
-			if (theSettings.gravity == iToastGravityTop) {
-				point = CGPointMake(window.frame.size.width - 45, window.frame.size.height / 2);
-			} else if (theSettings.gravity == iToastGravityBottom) {
-				point = CGPointMake(45,window.frame.size.height / 2);
-			} else if (theSettings.gravity == iToastGravityCenter) {
-				point = CGPointMake(window.frame.size.width/2, window.frame.size.height/2);
-			} else {
-				// TODO : handle this case
-				point = theSettings.postition;
-			}
-			
-			point = CGPointMake(point.x - theSettings.offsetTop, point.y - theSettings.offsetLeft);
+
+            if ([NSProcessInfo instancesRespondToSelector:@selector(isOperatingSystemAtLeastVersion:)])
+            {
+                // conditionally check for any version >= iOS 8 using 'isOperatingSystemAtLeastVersion'
+                if (theSettings.gravity == iToastGravityTop) {
+                    point = CGPointMake(window.frame.size.width/2, TOAST_IOS8_TOP_PADDING);
+                } else if (theSettings.gravity == iToastGravityBottom) {
+                    point = CGPointMake(window.frame.size.width/2, window.frame.size.height - v.frame.size.height - TOAST_IOS8_BOTTOM_PADDING);
+                } else if (theSettings.gravity == iToastGravityCenter) {
+                    point = CGPointMake(window.frame.size.width/2, window.frame.size.height/2);
+                } else {
+                    // TODO : handle this case
+                    point = theSettings.postition;
+                }
+            } else {
+                // we're on iOS 7 or below
+                v.transform = CGAffineTransformMakeRotation(M_PI/2); //rotation in radians
+                
+                if (theSettings.gravity == iToastGravityTop) {
+                    point = CGPointMake(window.frame.size.width - 45, window.frame.size.height / 2);
+                } else if (theSettings.gravity == iToastGravityBottom) {
+                    point = CGPointMake(45,window.frame.size.height / 2);
+                } else if (theSettings.gravity == iToastGravityCenter) {
+                    point = CGPointMake(window.frame.size.width/2, window.frame.size.height/2);
+                } else {
+                    // TODO : handle this case
+                    point = theSettings.postition;
+                }
+            }
+
+            point = CGPointMake(point.x - theSettings.offsetTop, point.y - theSettings.offsetLeft);
 			break;
 		}
+            
+            
 		case UIDeviceOrientationLandscapeRight:
 		{
-			if (version < 8.0) {
-				v.transform = CGAffineTransformMakeRotation(-M_PI/2);
-			}
-			
-			if (theSettings.gravity == iToastGravityTop) {
-				point = CGPointMake(45, window.frame.size.height / 2);
-			} else if (theSettings.gravity == iToastGravityBottom) {
-				point = CGPointMake(window.frame.size.width - 45, window.frame.size.height/2);
-			} else if (theSettings.gravity == iToastGravityCenter) {
-				point = CGPointMake(window.frame.size.width/2, window.frame.size.height/2);
-			} else {
-				// TODO : handle this case
-				point = theSettings.postition;
-			}
-			
+            
+            if ([NSProcessInfo instancesRespondToSelector:@selector(isOperatingSystemAtLeastVersion:)])
+            {
+                // conditionally check for any version >= iOS 8 using 'isOperatingSystemAtLeastVersion'
+                if (theSettings.gravity == iToastGravityTop) {
+                    point = CGPointMake(window.frame.size.width/2, TOAST_IOS8_TOP_PADDING);
+                } else if (theSettings.gravity == iToastGravityBottom) {
+                    point = CGPointMake(window.frame.size.width/2, window.frame.size.height - v.frame.size.height - TOAST_IOS8_BOTTOM_PADDING);
+                } else if (theSettings.gravity == iToastGravityCenter) {
+                    point = CGPointMake(window.frame.size.width/2, window.frame.size.height/2);
+                } else {
+                    // TODO : handle this case
+                    point = theSettings.postition;
+                }
+            } else {
+                // we're on iOS 7 or below
+                v.transform = CGAffineTransformMakeRotation(-M_PI/2);
+                
+                if (theSettings.gravity == iToastGravityTop) {
+                    point = CGPointMake(45, window.frame.size.height / 2);
+                } else if (theSettings.gravity == iToastGravityBottom) {
+                    point = CGPointMake(window.frame.size.width - 45, window.frame.size.height/2);
+                } else if (theSettings.gravity == iToastGravityCenter) {
+                    point = CGPointMake(window.frame.size.width/2, window.frame.size.height/2);
+                } else {
+                    // TODO : handle this case
+                    point = theSettings.postition;
+                }
+            }
+            
 			point = CGPointMake(point.x + theSettings.offsetTop, point.y + theSettings.offsetLeft);
 			break;
 		}
